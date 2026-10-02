@@ -1,0 +1,2 @@
+time,stops,lat,lon,distance,drive,target_yaw,current_yaw,turn,gps_offset,rvalue,gyaw,cyaw,std_gyaw,std_cyaw,distance5,stuck
+20251111183641,1,29.313647,-94.817086,55.75,1.00,191.89,126.25,-0.66,0.00,-1.00,0.00,0.00,0.00,0.00,0.00,0

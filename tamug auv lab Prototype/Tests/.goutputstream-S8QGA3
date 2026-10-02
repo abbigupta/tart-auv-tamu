@@ -1,0 +1,107 @@
+import time
+import os
+import sys
+import math
+import pygame
+import threading
+
+sys.path.append(os.path.abspath('../Devices/'))
+
+allDevices = ['GPS','ESC','TDS','AMG']
+devices = []
+
+for module in allDevices:
+	param = ''
+	if module == 'ESC': param = [19, 20]
+	if module == 'TDS': param = 1
+	if module == 'AMG': param = 'flag_gCalibrate=True'
+	try:
+		exec(f'import {module};')
+		exec(f'{module.lower()} = {module}.{module}({param});')
+		devices.append(module)
+	except:
+		pass
+
+running = True
+keyControl = 'None'
+
+def loopGPS():
+	while running:
+		gps.tick()
+		time.sleep(0.01)
+
+def loopESC():
+	esc.arm()
+	esc.setMotionModel('Differential')
+	while running:
+		if (keyControl == 'None'):
+			esc.setMotion([0.0, 0.0])
+		elif (keyControl == 'UP'):
+			esc.setMotion([1.0, 0.0])
+		elif (keyControl == 'DOWN'):
+			esc.setMotion([-1.0, 0.0])
+		elif (keyControl == 'LEFT'):
+			esc.setMotion([0.0, 1.0])
+		elif (keyControl == 'RIGHT'):
+			esc.setMotion([0.0, -1.0])
+		time.sleep(0.05)
+	esc.disarm()
+
+def loopTDS():
+	while running:
+		tds.tick()
+		time.sleep(0.05)
+
+def loopAMG():
+	while running:
+		amg.tick()
+		time.sleep(0.05)
+
+def loopKEYBOARD():
+	global keyControl
+	pygame.init()
+	screen = pygame.display.set_mode((400, 300))
+	pygame.display.set_caption('Arrow Key Detector')
+	while running:
+		for event in pygame.event.get():
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_UP:
+					keyControl = 'UP'
+				elif event.key == pygame.K_DOWN:
+					keyControl = 'DOWN'
+				elif event.key == pygame.K_LEFT:
+					keyControl = 'LEFT'
+				elif event.key == pygame.K_RIGHT:
+					keyControl = 'RIGHT'
+			else:
+				keyControl = 'None'
+		time.sleep(0.05)
+	pygame.quit()
+	sys.exit()
+		
+
+def loopMain():
+	global running
+	runtime = 10
+	fps = 10
+	for i in range(runtime*fps + 1):
+		os.system('clear')
+		for module in devices:
+			exec(f'{module.lower()}.printData()')
+		print(f'\n{i}/{runtime*fps}')
+		time.sleep(1/fps)
+	running = False
+
+def thr(name):
+	return threading.Thread(target = name, args = ())
+
+threads = [thr(loopMain)]
+for module in devices:
+	exec(f'threads.append(thr(loop{module}))')
+threads.append(thr(loopKEYBOARD))
+
+for t in threads:
+	t.start()
+for t in threads:
+	t.join()
+

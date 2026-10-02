@@ -1,0 +1,2 @@
+time,stops,lat,lon,distance,drive,target_yaw,current_yaw,error_yaw,error_yaw_derivative,turn,max_turn,stuck
+20251030115817,2,29.314260,-94.816743,134.53,1.00,201.1,173.81101988680712,-27.32863665560285,0.07427581456943244,-0.27,0.27,0
